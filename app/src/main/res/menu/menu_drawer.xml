@@ -24,13 +24,17 @@
             android:icon="@mipmap/ic_launcher_round"
             android:title="Overview" />
         <item
-            android:id="@+id/navigation_second"
+            android:id="@+id/navigation_syslog"
             android:icon="@mipmap/ic_launcher_round"
-            android:title="SecondPage" />
+            android:title="System Log" />
         <item
-            android:id="@+id/navigation_third"
+            android:id="@+id/navigation_kernellog"
             android:icon="@mipmap/ic_launcher_round"
-            android:title="ThirdPage" />
+            android:title="Kernel Log" />
+        <item
+            android:id="@+id/navigation_wifi"
+            android:icon="@mipmap/ic_launcher_round"
+            android:title="WiFi Info" />
         <item
             android:id="@+id/navigation_login"
             android:icon="@mipmap/ic_launcher_round"

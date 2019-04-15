@@ -17,13 +17,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.thetransactioncompany.jsonrpc2.client.JSONRPC2Session;
-
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
-
 public class BaseActivity extends AppCompatActivity {
 
     public static final String LUCI_RPC_PATH = "/cgi-bin/luci/rpc/";
@@ -198,11 +191,14 @@ public class BaseActivity extends AppCompatActivity {
                     case R.id.navigation_overview:
                         activityClass = OverviewActivity.class;
                         break;
-                    case R.id.navigation_second:
-                        activityClass = SecondActivity.class;
+                    case R.id.navigation_syslog:
+                        activityClass = SystemLogActivity.class;
                         break;
-                    case R.id.navigation_third:
-                        activityClass = ThirdActivity.class;
+                    case R.id.navigation_kernellog:
+                        activityClass = KernelLogActivity.class;
+                        break;
+                    case R.id.navigation_wifi:
+                        activityClass = WiFiActivity.class;
                         break;
                     case R.id.navigation_login:
                         activityClass = LoginActivity.class;
@@ -239,10 +235,10 @@ public class BaseActivity extends AppCompatActivity {
                 });
         if (OverviewActivity.class.isAssignableFrom(getClass())) {
             navigationView.setCheckedItem(R.id.navigation_overview);
-        } else if (SecondActivity.class.isAssignableFrom(getClass())) {
-            navigationView.setCheckedItem(R.id.navigation_second);
-        } else if (ThirdActivity.class.isAssignableFrom(getClass())) {
-            navigationView.setCheckedItem(R.id.navigation_third);
+        } else if (SystemLogActivity.class.isAssignableFrom(getClass())) {
+            navigationView.setCheckedItem(R.id.navigation_syslog);
+        } else if (KernelLogActivity.class.isAssignableFrom(getClass())) {
+            navigationView.setCheckedItem(R.id.navigation_kernellog);
         } else if (LoginActivity.class.isAssignableFrom(getClass())) {
             navigationView.setCheckedItem(R.id.navigation_login);
         }

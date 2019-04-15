@@ -41,10 +41,13 @@
             android:name="com.example.android.rpcwrt.OverviewActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name="com.example.android.rpcwrt.SecondActivity"
+            android:name="com.example.android.rpcwrt.SystemLogActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name="com.example.android.rpcwrt.ThirdActivity"
+            android:name="com.example.android.rpcwrt.KernelLogActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name="com.example.android.rpcwrt.WiFiActivity"
             android:screenOrientation="portrait" />
     </application>
 
