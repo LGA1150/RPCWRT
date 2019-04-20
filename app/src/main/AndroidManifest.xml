@@ -47,7 +47,16 @@
             android:name="com.example.android.rpcwrt.KernelLogActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:name="com.example.android.rpcwrt.NeighborActivity"
+            android:screenOrientation="portrait" />
+        <activity
             android:name="com.example.android.rpcwrt.WiFiActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name="com.example.android.rpcwrt.OpkgListActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name="com.example.android.rpcwrt.RebootActivity"
             android:screenOrientation="portrait" />
     </application>
 

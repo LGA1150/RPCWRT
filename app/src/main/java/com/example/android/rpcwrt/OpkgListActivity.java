@@ -16,22 +16,21 @@ import com.thetransactioncompany.jsonrpc2.client.JSONRPC2SessionOptions;
 
 import net.minidev.json.*;
 
-
-import java.math.RoundingMode;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class WiFiActivity extends BaseActivity {
+public class OpkgListActivity extends BaseActivity {
 
-    private WiFiTask wiFiTask;
+    private OpkgTask opkgTask;
     private RecyclerView recyclerView;
     private MyAdapter myAdapter;
-    private List<JSONObject> iwInfoList;
+    private JSONObject opkgList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +62,7 @@ public class WiFiActivity extends BaseActivity {
         connect();
     }
 
-    private class WiFiTask extends AsyncTask<String, Integer, String> {
+    private class OpkgTask extends AsyncTask<String, Integer, String> {
         @Override
         protected void onPreExecute() {
             showProgressBar();
@@ -83,22 +82,13 @@ public class WiFiActivity extends BaseActivity {
         protected String doInBackground(String... strings) {
             try {
                 int requestId = 0;
-                // first get available radio devices
                 List<Object> params = new ArrayList<>();
-                params.add("ubus call iwinfo devices");
-                request = new JSONRPC2Request("exec", params, requestId);;
+                params.add("ubus call rpc-sys packagelist");
+                request = new JSONRPC2Request("exec", params, requestId);
                 response = session.send(request);
                 JSONObject jsonObject = (JSONObject) JSONValue.parse(response.getResult().toString());
-                JSONArray wifidevs = (JSONArray) jsonObject.get("devices");
+                opkgList = (JSONObject) JSONValue.parse(jsonObject.get("packages").toString());
 
-                iwInfoList = new ArrayList<>();
-                for (Object wifidev: wifidevs) {
-                    params = new ArrayList<>();
-                    params.add(wifidev);
-                    request = new JSONRPC2Request("wifi.getiwinfo", params, requestId);
-                    response = session.send(request);
-                    iwInfoList.add((JSONObject) JSONValue.parse(response.getResult().toString()));
-                }
             } catch (JSONRPC2SessionException e) {
                 // clear previous response
                 response = null;
@@ -113,44 +103,23 @@ public class WiFiActivity extends BaseActivity {
         @Override
         protected void onPostExecute(String s) {
             if  (response != null && response.indicatesSuccess() && response.getResult() != null) {
-                for (JSONObject iwInfo: iwInfoList) {
-                    myAdapter.addItem(new Item((String)iwInfo.get("ifname"), ""));
-                    myAdapter.addItem(new Item("SSID",(String)iwInfo.get("ssid")));
-                    JSONObject encryption = (JSONObject)iwInfo.get("encryption");
-                    myAdapter.addItem(new Item("Encryption", (String)encryption.get("description")));
-                    DecimalFormat df = new DecimalFormat("#.#");
-                    df.setRoundingMode(RoundingMode.FLOOR);
-                    myAdapter.addItem(new Item("Frequency", df.format((Integer)iwInfo.get("frequency")/1000.0)+ "GHz"));
-                    myAdapter.addItem(new Item("Channel", ((Integer)iwInfo.get("channel")).toString()));
-                    myAdapter.addItem(new Item("Hardware", (String)iwInfo.get("hardware_name")));
-                    myAdapter.addItem(new Item("BSSID (MAC Address)", (String)iwInfo.get("bssid")));
-                    myAdapter.addItem(new Item("Transmit Power", ((Integer)iwInfo.get("txpower")).toString() + "dBm"));
-                    Object assoc = iwInfo.get("assoclist");
-                    if (assoc instanceof JSONObject) {
-                        try {
-                            JSONObject assocList = (JSONObject) assoc;
-                            StringBuilder stas = new StringBuilder();
-                            for (Iterator it = assocList.entrySet().iterator(); it.hasNext(); ) {
-                                Map.Entry entry = (Map.Entry) it.next();
-                                stas.append("MAC: ").append(entry.getKey()).append('\n');
-                                String vendor = queryOUI((String) entry.getKey());
-                                if (vendor != null)
-                                    stas.append("Vendor: ").append(vendor).append('\n');
-                                stas.append('\n');
-                            }
-                            myAdapter.addItem(new Item("Associated Stations", stas.toString()));
-                            // System.out.print(stas.toString());
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                if (opkgList != null) {
+                    List arrayList = new ArrayList<>(opkgList.keySet());
+                    Collections.sort(arrayList, new Comparator() {
+                        @Override
+                        public int compare(Object o1, Object o2) {
+                            return o1.toString().compareTo(o2.toString());
                         }
-                    } else {
-                        myAdapter.addItem(new Item("Associated Stations", "None"));
+                    });
+
+                    for (Iterator it = arrayList.iterator(); it.hasNext();) {
+                        String key = (String) it.next();
+                        myAdapter.addItem(new Item(key, opkgList.get(key).toString()));
                     }
                 }
             } else {
                 printFailMessage();
                 showFailButtons();
-                // doLogout();
             }
             hideProgressBar();
         }
@@ -159,18 +128,18 @@ public class WiFiActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         // Avoid memory leak
-        if (wiFiTask != null && !wiFiTask.isCancelled()) {
-            wiFiTask.cancel(true);
-            wiFiTask = null;
+        if (opkgTask != null && !opkgTask.isCancelled()) {
+            opkgTask.cancel(true);
+            opkgTask = null;
         }
         super.onDestroy();
     }
 
     private void connect() {
         // Avoid creation of multiple requests
-        if ( wiFiTask == null || wiFiTask.getStatus() != AsyncTask.Status.RUNNING) {
-            wiFiTask = new WiFiTask();
-            wiFiTask.execute();
+        if ( opkgTask == null || opkgTask.getStatus() != AsyncTask.Status.RUNNING) {
+            opkgTask = new OpkgTask();
+            opkgTask.execute();
         }
     }
 }

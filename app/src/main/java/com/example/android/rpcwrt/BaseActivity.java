@@ -1,31 +1,58 @@
-
 package com.example.android.rpcwrt;
 
+import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
+import android.util.SparseArray;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.Toast;
+
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
+import com.thetransactioncompany.jsonrpc2.client.JSONRPC2Session;
+
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Scanner;
+import java.util.stream.Stream;
 
 public class BaseActivity extends AppCompatActivity {
 
     public static final String LUCI_RPC_PATH = "/cgi-bin/luci/rpc/";
+    public static final String OUI_PATH = "oui.txt";
+
+    protected ProgressBar progressBar;
+    protected Button retryButton;
+    protected Button logOutButton;
+    protected JSONRPC2Session session;
+    protected JSONRPC2Request request;
+    protected JSONRPC2Response response;
 
     protected static String baseUrl = "";
     protected static String token = "";
     protected static Boolean isLoggedIn = false;
-
-    private static final String TAG = "BaseActivity";
+    protected static SparseArray<String> oui;
 
     private Toolbar mToolbar;
 
@@ -40,7 +67,6 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "Activity onCreate");
     }
 
     @Override
@@ -96,6 +122,8 @@ public class BaseActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    boolean doubleBackToExitPressedOnce = false;
+
     @Override
     public void onBackPressed() {
         // If the drawer is open, back will close it
@@ -109,7 +137,22 @@ public class BaseActivity extends AppCompatActivity {
             fragmentManager.popBackStack();
         } else {
             // Lastly, it will rely on the system behavior for back
-            super.onBackPressed();
+            if (doubleBackToExitPressedOnce) {
+                super.onBackPressed();
+                if (LoginActivity.class.isAssignableFrom(getClass()))
+                    System.exit(0);
+                return;
+            }
+
+            this.doubleBackToExitPressedOnce = true;
+            Toast.makeText(this, "Press BACK again to exit", Toast.LENGTH_SHORT).show();
+
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    doubleBackToExitPressedOnce=false;
+                }
+            }, 2000);
         }
     }
 
@@ -200,6 +243,15 @@ public class BaseActivity extends AppCompatActivity {
                     case R.id.navigation_wifi:
                         activityClass = WiFiActivity.class;
                         break;
+                    case R.id.navigation_neighbor:
+                        activityClass = NeighborActivity.class;
+                        break;
+                    case R.id.navigation_opkg:
+                        activityClass = OpkgListActivity.class;
+                        break;
+                    case R.id.navigation_reboot:
+                        activityClass = RebootActivity.class;
+                        break;
                     case R.id.navigation_login:
                         activityClass = LoginActivity.class;
                         break;
@@ -239,6 +291,14 @@ public class BaseActivity extends AppCompatActivity {
             navigationView.setCheckedItem(R.id.navigation_syslog);
         } else if (KernelLogActivity.class.isAssignableFrom(getClass())) {
             navigationView.setCheckedItem(R.id.navigation_kernellog);
+        } else if (NeighborActivity.class.isAssignableFrom(getClass())) {
+            navigationView.setCheckedItem(R.id.navigation_neighbor);
+        } else if (WiFiActivity.class.isAssignableFrom(getClass())) {
+            navigationView.setCheckedItem(R.id.navigation_wifi);
+        } else if (OpkgListActivity.class.isAssignableFrom(getClass())) {
+            navigationView.setCheckedItem(R.id.navigation_opkg);
+        } else if (RebootActivity.class.isAssignableFrom(getClass())) {
+            navigationView.setCheckedItem(R.id.navigation_reboot);
         } else if (LoginActivity.class.isAssignableFrom(getClass())) {
             navigationView.setCheckedItem(R.id.navigation_login);
         }
@@ -248,8 +308,58 @@ public class BaseActivity extends AppCompatActivity {
         // Invalidate session, do not clear URL
         token = "";
         isLoggedIn = false;
+        // Toast.makeText(BaseActivity.this, "Logging out...", Toast.LENGTH_SHORT).show();
         // Go back to Login page
         startActivity(new Intent(BaseActivity.this, LoginActivity.class));
         finish();
+    }
+
+    protected void showFailButtons () {
+        retryButton.setVisibility(View.VISIBLE);
+        logOutButton.setVisibility(View.VISIBLE);
+    }
+
+    protected void showProgressBar() {
+        progressBar.setVisibility(View.VISIBLE);
+    }
+
+    protected void hideFailButtons() {
+        retryButton.setVisibility(View.GONE);
+        logOutButton.setVisibility(View.GONE);
+    }
+
+    protected void hideProgressBar() {
+        progressBar.setVisibility(View.GONE);
+    }
+
+    protected void printFailMessage() {
+        Toast.makeText(BaseActivity.this, "Invalid response,\n Maybe connection problem, missing RPC packages or session expired",Toast.LENGTH_SHORT).show();
+    }
+
+    protected static void initializeOUI(Activity activity) {
+        if (oui != null) return;
+        oui = new SparseArray<>();
+        try {
+            DataInputStream textFileStream = new DataInputStream(activity.getAssets().open(OUI_PATH));
+            Scanner scanner = new Scanner(textFileStream);
+
+            while (scanner.hasNextLine()) {
+                String[] columns = scanner.nextLine().split("\t");
+                oui.put(Integer.parseInt(columns[0], 16), columns[1]);
+            }
+
+            textFileStream.close();
+        } catch (IOException e) {
+            // The file is missing, exit program
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
+
+    @Nullable
+    protected static String queryOUI(String mac) {
+        String s = mac.substring(0, 8);
+        s = s.replace(":", "");
+        return oui.get(Integer.parseInt(s, 16));
     }
 }

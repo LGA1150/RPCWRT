@@ -18,12 +18,14 @@
                 android:id="@+id/title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:fontFamily="monospace"
                 android:text="Title" />
             <TextView
                 android:textSize="12.0sp"
                 android:id="@+id/content"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:fontFamily="monospace"
                 android:text="content"
                 android:layout_below="@id/title" />
         </LinearLayout>

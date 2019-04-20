@@ -27,12 +27,7 @@ public class SystemLogActivity extends BaseActivity {
     private static final String TAG = "SystemLogActivity";
     private LogTask logTask;
     private TextView log;
-    private ProgressBar progressBar;
-    private Button retryButton;
     private FloatingActionButton fab;
-    private JSONRPC2Session session;
-    private JSONRPC2Request request;
-    private JSONRPC2Response response;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,8 +45,14 @@ public class SystemLogActivity extends BaseActivity {
                 connect();
             }
         });
+        logOutButton = findViewById(R.id.logout_btn);
+        logOutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                doLogout();
+            }
+        });
         fab = findViewById(R.id.fab);
-        fab.hide();
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -76,8 +77,8 @@ public class SystemLogActivity extends BaseActivity {
     private class LogTask extends AsyncTask<String, Integer, String> {
         @Override
         protected void onPreExecute() {
-            progressBar.setVisibility(View.VISIBLE);
-            retryButton.setVisibility(View.GONE);
+            showProgressBar();
+            hideFailButtons();
             try {
                 session = new JSONRPC2Session(new URL(baseUrl + LUCI_RPC_PATH + "sys?auth=" + token));
                 JSONRPC2SessionOptions options = session.getOptions();
@@ -113,10 +114,10 @@ public class SystemLogActivity extends BaseActivity {
                 log.setText(response.getResult().toString());
 
             } else {
-                Toast.makeText(SystemLogActivity.this, "Invalid response\nSession may be expired",Toast.LENGTH_SHORT).show();
-                retryButton.setVisibility(View.VISIBLE);
+                printFailMessage();
+                showFailButtons();
             }
-            progressBar.setVisibility(View.GONE);
+            hideProgressBar();
         }
     }
 
@@ -124,6 +125,7 @@ public class SystemLogActivity extends BaseActivity {
         @Override
         protected void onPreExecute() {
             log.setText("");
+            showProgressBar();
         }
 
         @Override
@@ -136,6 +138,12 @@ public class SystemLogActivity extends BaseActivity {
                 response = session.send(request);
             } catch (Exception e) {}
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            connect();
+            Toast.makeText(SystemLogActivity.this, "Log cleared", Toast.LENGTH_SHORT).show();
         }
     }
     @Override

@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context=".LoginActivity">
+    tools:context=".RebootActivity">
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -20,11 +20,11 @@
                 layout="@layout/customize_toolbar" />
 
             <TextView
-                android:id="@+id/main_text"
+                android:id="@+id/reboot_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Please Log In"
-                app:layout_constraintBottom_toTopOf="@id/main_url"
+                android:text="Click the button to reboot"
+                app:layout_constraintBottom_toTopOf="@id/reboot_btn"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/toolbar_container" />
@@ -34,46 +34,23 @@
                 android:visibility="gone"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                app:layout_constraintBottom_toTopOf="@id/reboot_btn"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/toolbar_container"
-                app:layout_constraintBottom_toTopOf="@id/main_url"/>
+                app:layout_constraintTop_toBottomOf="@id/toolbar_container"/>
 
-            <EditText
-                android:id="@+id/main_url"
-                android:layout_width="260dp"
+            <Button
+                android:id="@+id/reboot_btn"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:inputType="textUri"
-                android:hint="URL"
-                android:importantForAutofill="no"
-                android:text="http://192.168.1.1"
-                app:layout_constraintVertical_chainStyle="packed"
-                app:layout_constraintBottom_toTopOf="@id/main_password"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/toolbar_container" />
-
-            <EditText
-                android:id="@+id/main_password"
-                android:layout_width="260dp"
-                android:layout_height="wrap_content"
-                android:inputType="textPassword"
-                android:hint="Password"
-                app:layout_constraintVertical_chainStyle="packed"
+                android:text="Reboot"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toLeftOf="@id/main_url"
-                app:layout_constraintRight_toRightOf="@id/main_url"
-                app:layout_constraintTop_toBottomOf="@id/main_url" />
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/reboot_text" />
+
         </android.support.constraint.ConstraintLayout>
 
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-            android:layout_margin="@dimen/fab_margin"
-            app:srcCompat="@android:drawable/ic_dialog_email" />
     </RelativeLayout>
 
     <android.support.design.widget.NavigationView

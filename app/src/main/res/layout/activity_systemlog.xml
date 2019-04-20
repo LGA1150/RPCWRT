@@ -29,13 +29,26 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/toolbar_container"/>
 
+
             <Button
                 android:id="@+id/retry_btn"
-                android:text="RETRY"
+                android:text="Retry"
                 android:visibility="gone"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                app:layout_constraintHorizontal_chainStyle="packed"
                 app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toLeftOf="@id/logout_btn"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/toolbar_container"/>
+            <Button
+                android:id="@+id/logout_btn"
+                android:text="Log Out"
+                android:visibility="gone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintHorizontal_chainStyle="packed"
+                app:layout_constraintLeft_toRightOf="@id/retry_btn"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/toolbar_container"/>
@@ -46,16 +59,17 @@
                 android:layout_height="wrap_content"
                 android:fillViewport="true"
                 android:scrollbars="vertical"
-                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/toolbar_container"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/toolbar_container">
+                android:paddingBottom="50dp">
 
                 <TextView
                     android:id="@+id/log_text"
-                    android:layout_marginTop="30dp"
+                    android:textSize="12.0sp"
                     android:layout_width="fill_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace" />
             </ScrollView>
         </android.support.constraint.ConstraintLayout>
 
@@ -66,7 +80,7 @@
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
             android:layout_margin="@dimen/fab_margin"
-            app:srcCompat="@android:drawable/ic_dialog_email" />
+            app:srcCompat="@android:drawable/ic_menu_delete" />
     </RelativeLayout>
 
     <android.support.design.widget.NavigationView

@@ -32,9 +32,21 @@
             android:icon="@mipmap/ic_launcher_round"
             android:title="Kernel Log" />
         <item
+            android:id="@+id/navigation_neighbor"
+            android:icon="@mipmap/ic_launcher_round"
+            android:title="Neighbor" />
+        <item
             android:id="@+id/navigation_wifi"
             android:icon="@mipmap/ic_launcher_round"
             android:title="WiFi Info" />
+        <item
+            android:id="@+id/navigation_opkg"
+            android:icon="@mipmap/ic_launcher_round"
+            android:title="Opkg List" />
+        <item
+            android:id="@+id/navigation_reboot"
+            android:icon="@mipmap/ic_launcher_round"
+            android:title="Reboot" />
         <item
             android:id="@+id/navigation_login"
             android:icon="@mipmap/ic_launcher_round"

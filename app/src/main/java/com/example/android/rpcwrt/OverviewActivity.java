@@ -45,15 +45,9 @@ import net.minidev.json.JSONValue;
 public class OverviewActivity extends BaseActivity {
 
     private TextView wifiText;
-    private JSONRPC2Session session;
-    private JSONRPC2Request request;
-    private JSONRPC2Response response;
     private OverviewTask overviewTask;
-    private ProgressBar progressBar;
-    private Button retryButton;
     private RecyclerView recyclerView;
     private MyAdapter myAdapter;
-//    private static final String TAG = "OverviewActivity";
 
     private Integer uptime;
     private Integer memTotal;
@@ -81,6 +75,13 @@ public class OverviewActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
                 connect();
+            }
+        });
+        logOutButton = findViewById(R.id.logout_btn);
+        logOutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                doLogout();
             }
         });
 
@@ -167,9 +168,9 @@ public class OverviewActivity extends BaseActivity {
             if  (response != null && response.indicatesSuccess() && response.getResult() != null) {
                 parseJSONStringAndUpdateUI(response.getResult().toString());
             } else {
-                Toast.makeText(OverviewActivity.this, "Invalid response\nSession may be expired",Toast.LENGTH_SHORT).show();
-                retryButton.setVisibility(View.VISIBLE);
-                progressBar.setVisibility(View.GONE);
+                printFailMessage();
+                showFailButtons();
+                hideProgressBar();
                 // doLogout();
             }
         }
@@ -194,10 +195,8 @@ public class OverviewActivity extends BaseActivity {
     }
 
     private void parseJSONStringAndUpdateUI(String jsonString) {
-        progressBar.setVisibility(View.GONE);
-        retryButton.setVisibility(View.GONE);
-        // wifiText.setText(jsonString);
-        //for (int i = 0; i < 10; i++)
+        hideFailButtons();
+        hideProgressBar();
         myAdapter.addItem(new Item("URL", baseUrl));
         myAdapter.addItem(new Item("Model", model));
         myAdapter.addItem(new Item("OS Version", osVersion));

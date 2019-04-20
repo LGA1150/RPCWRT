@@ -3,6 +3,7 @@ package com.example.android.rpcwrt;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -28,10 +29,6 @@ public class LoginActivity extends BaseActivity {
     private EditText mainUrl;
     private EditText mainPassword;
     private TextView mainText;
-    private ProgressBar progressBar;
-    private JSONRPC2Session session;
-    private JSONRPC2Request request;
-    private JSONRPC2Response response;
     private LoginTask loginTask;
 
     @Override
@@ -55,6 +52,13 @@ public class LoginActivity extends BaseActivity {
             mainUrl.setText(baseUrl);
         }
         initializeToolbar();
+
+        new Thread((new Runnable() {
+            @Override
+            public void run() {
+                initializeOUI(LoginActivity.this);
+            }
+        })).run();
     }
 
     private final View.OnClickListener loginListener = new View.OnClickListener() {
@@ -111,6 +115,7 @@ public class LoginActivity extends BaseActivity {
                 response = session.send(request);
             } catch (JSONRPC2SessionException e) {
                 // clear previous response
+                e.printStackTrace();
                 response = null;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -146,7 +151,6 @@ public class LoginActivity extends BaseActivity {
 
     protected void doLogin() {
         token = response.getResult().toString();
-        Toast.makeText(LoginActivity.this, "Success. Token is " + token, Toast.LENGTH_LONG).show();
         isLoggedIn = true;
         startActivity(new Intent(LoginActivity.this, OverviewActivity.class));
         finish();
